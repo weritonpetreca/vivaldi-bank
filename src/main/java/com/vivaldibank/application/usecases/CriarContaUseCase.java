@@ -1,0 +1,53 @@
+package com.vivaldibank.application.usecases;
+
+import com.vivaldibank.domain.model.Conta;
+import com.vivaldibank.domain.ports.in.CriarContaCommand;
+import com.vivaldibank.domain.ports.in.CriarContaUseCasePort;
+import com.vivaldibank.domain.ports.out.ContaRepositoryPort;
+
+import java.math.BigDecimal;
+import java.time.Year;
+import java.util.Optional;
+
+public class CriarContaUseCase implements CriarContaUseCasePort {
+
+    private final ContaRepositoryPort contaRepository;
+
+    public CriarContaUseCase(ContaRepositoryPort contaRepository) {
+        this.contaRepository = contaRepository;
+    }
+
+    @Override
+    public Conta executar(CriarContaCommand command) {
+        String novoNumero = gerarProximoNumero();
+
+        Conta novaConta = new Conta(novoNumero, command.titularNome(), command.cpf());
+
+        if (command.depositoInicial() != null && command.depositoInicial().compareTo(BigDecimal.ZERO) > 0) {
+            novaConta.depositar(command.depositoInicial());
+        }
+
+        return contaRepository.salvar(novaConta);
+    }
+
+    private String gerarProximoNumero() {
+        Optional<String> ultimoNumeroOpt = contaRepository.buscarUltimoNumeroConta();
+
+        int anoAtual = Year.now().getValue();
+
+        if (ultimoNumeroOpt.isEmpty()) {
+            return String.format("%d%04d", anoAtual, 1);
+        }
+
+        String ultimoNumero = ultimoNumeroOpt.get();
+
+        int ultimoAno = Integer.parseInt(ultimoNumero.substring(0,4));
+        int seqUltimaConta = Integer.parseInt(ultimoNumero.substring(4));
+
+        if (anoAtual > ultimoAno) {
+            return String.format("%d%04d", anoAtual, 1);
+        }
+
+        return String.format("%d%04d", anoAtual, seqUltimaConta + 1);
+    }
+}

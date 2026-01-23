@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  #Banco de Dados
+  postgres:
+    image: postgres:16-alpine
+    container_name: vivaldi-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  #AWS Simulada
+  localstack:
+    image: localstack/localstack
+    container_name: vivaldi-aws
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,sqs
+      - DEBUG=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "./volumes/localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+volumes:
+  postgres_data:
