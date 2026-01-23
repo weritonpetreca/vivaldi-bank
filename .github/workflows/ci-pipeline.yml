@@ -1,0 +1,43 @@
+name: Java CI with Gradle
+
+# Quando esse pipeline vai rodar?
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # A máquina virtual do Github
+
+    steps:
+      # 1. Baixa o seu código
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Instala o Java 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # 3. Dá permissão de execução para o Gradle Wrapper
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 4. Roda os testes (Unitários e Integração com Testcontainers)
+      - name: Build with Gradle and Run Tests
+        run: ./gradlew build
+
+      # 5. (Opcional) Publica relatório de testes se falhar
+      - name: Upload Test Report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: build/reports/tests/test/
