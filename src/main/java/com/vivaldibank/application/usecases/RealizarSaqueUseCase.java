@@ -17,7 +17,7 @@ public class RealizarSaqueUseCase {
 
     @Transactional
     public Conta executar(String id, BigDecimal valor) {
-        Conta conta = contaRepositoryPort.buscarPorId(id)
+        Conta conta = contaRepositoryPort.buscarPorIdParaAlteracao(id)
                 .orElseThrow(() -> new ContaNaoEncontradaException(id));
 
         conta.sacar(valor);

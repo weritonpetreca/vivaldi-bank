@@ -56,8 +56,8 @@ class ContaControllerTest {
     @DisplayName("Deve criar uma conta com sucesso e retornar status 201")
     void deveCriarContaComSucesso() throws Exception {
 
-        CriarContaRequest request = new CriarContaRequest("Geralt de Rivia", "09331162685", BigDecimal.ZERO);
-        Conta contaCriada = new Conta("20260001", "Geralt de Rivia", "09331162685");
+        CriarContaRequest request = new CriarContaRequest("Geralt de Rivia", "09331162685", BigDecimal.ZERO, "senha123");
+        Conta contaCriada = new Conta("20260001", "Geralt de Rivia", "09331162685", "senha123");
 
         when(criarContaUseCase.executar(any(CriarContaCommand.class))).thenReturn(contaCriada);
 
@@ -74,7 +74,7 @@ class ContaControllerTest {
     @DisplayName("Deve retornar 400 Bad Request quando dados de entrada forem inválidos")
     void deveRetornarErroQuandoDadosInvalidos() throws Exception {
 
-        CriarContaRequest requestInvalido = new CriarContaRequest("", "", BigDecimal.ZERO);
+        CriarContaRequest requestInvalido = new CriarContaRequest("", "", BigDecimal.ZERO, "senha123");
 
         mockMvc.perform(post("/contas")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -88,7 +88,7 @@ class ContaControllerTest {
     @DisplayName("Deve retornar 422 Unprocessable Entity quando regra de negócio falhar")
     void deveRetornarErroQuandoRegraNegocioFalhar() throws Exception {
 
-        CriarContaRequest request = new CriarContaRequest("Geralt de Rivia", "00000000000", BigDecimal.ZERO);
+        CriarContaRequest request = new CriarContaRequest("Geralt de Rivia", "00000000000", BigDecimal.ZERO, "senha123");
 
         when(criarContaUseCase.executar(any(CriarContaCommand.class)))
                 .thenThrow(new IllegalArgumentException("CPF inválido"));

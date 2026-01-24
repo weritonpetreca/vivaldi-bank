@@ -1,6 +1,7 @@
 package com.vivaldibank.infrastructure.adapters.in.web.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
@@ -12,5 +13,9 @@ public record CriarContaRequest(
         @NotBlank(message = "O CPF é obrigatório")
         String cpf,
 
-        BigDecimal depositoInicial
+        @NotNull
+        BigDecimal depositoInicial,
+
+        @NotBlank
+        String senha
 ) {}

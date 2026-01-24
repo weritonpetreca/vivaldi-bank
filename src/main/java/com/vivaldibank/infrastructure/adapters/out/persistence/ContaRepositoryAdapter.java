@@ -27,6 +27,12 @@ public class ContaRepositoryAdapter implements ContaRepositoryPort {
 
     @Override
     public Optional<Conta> buscarPorId(String id) {
+        Optional<ContaEntity> entityOpt = springRepository.findById(UUID.fromString(id));
+        return entityOpt.map(contaMapper::toDomain);
+    }
+
+    @Override
+    public Optional<Conta> buscarPorIdParaAlteracao(String id) {
         Optional<ContaEntity> entityOpt = springRepository.findByIdWithLock(UUID.fromString(id));
 
         return entityOpt.map(contaMapper::toDomain);

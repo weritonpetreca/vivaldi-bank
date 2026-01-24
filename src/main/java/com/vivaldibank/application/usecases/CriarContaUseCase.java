@@ -4,6 +4,7 @@ import com.vivaldibank.domain.model.Conta;
 import com.vivaldibank.domain.ports.in.CriarContaCommand;
 import com.vivaldibank.domain.ports.in.CriarContaUseCasePort;
 import com.vivaldibank.domain.ports.out.ContaRepositoryPort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.Year;
@@ -21,7 +22,14 @@ public class CriarContaUseCase implements CriarContaUseCasePort {
     public Conta executar(CriarContaCommand command) {
         String novoNumero = gerarProximoNumero();
 
-        Conta novaConta = new Conta(novoNumero, command.titularNome(), command.cpf());
+        String senhaCriptografada = new BCryptPasswordEncoder().encode(command.senha());
+
+        Conta novaConta = new Conta(
+            novoNumero,
+            command.titularNome(),
+            command.cpf(),
+            senhaCriptografada
+        );
 
         if (command.depositoInicial() != null && command.depositoInicial().compareTo(BigDecimal.ZERO) > 0) {
             novaConta.depositar(command.depositoInicial());

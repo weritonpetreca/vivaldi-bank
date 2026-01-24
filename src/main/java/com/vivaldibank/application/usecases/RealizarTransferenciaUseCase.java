@@ -22,10 +22,10 @@ public class RealizarTransferenciaUseCase {
             throw new IllegalArgumentException("Não é possível transferir para a mesma conta");
         }
 
-        Conta origem = contaRepositoryPort.buscarPorId(idOrigem)
+        Conta origem = contaRepositoryPort.buscarPorIdParaAlteracao(idOrigem)
                 .orElseThrow(() -> new ContaNaoEncontradaException(idOrigem));
 
-        Conta destino = contaRepositoryPort.buscarPorId(idDestino)
+        Conta destino = contaRepositoryPort.buscarPorIdParaAlteracao(idDestino)
                 .orElseThrow(() -> new ContaNaoEncontradaException(idDestino));
 
         origem.debitarTransferenciaEnviada(valor, destino);

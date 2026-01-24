@@ -4,14 +4,17 @@ import com.vivaldibank.application.usecases.*;
 import com.vivaldibank.domain.model.Conta;
 import com.vivaldibank.domain.ports.in.CriarContaCommand;
 import com.vivaldibank.infrastructure.adapters.in.web.dto.*;
+import com.vivaldibank.infrastructure.security.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.math.BigDecimal;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/contas")
@@ -25,10 +28,11 @@ public class ContaController {
     private final RealizarDepositoUseCase realizarDepositoUseCase;
     private final RealizarSaqueUseCase realizarSaqueUseCase;
     private final RealizarTransferenciaUseCase realizarTransferenciaUseCase;
+    private final TokenService tokenService;
 
     @PostMapping
-    @Operation(summary = "Criar conta", description = "Criar uma nova conta bancária.")
-    public ResponseEntity<ContaResponse> criarConta(@RequestBody @Valid CriarContaRequest request) {
+    @Operation(summary = "Criar nova conta", description = "Criar uma conta e já retorna o Token de acesso (Auto-Login.")
+    public ResponseEntity<ContaCriadaResponse> criarConta(@RequestBody @Valid CriarContaRequest request) {
 
         BigDecimal valorInicial = request.depositoInicial() != null
                 ? request.depositoInicial()
@@ -37,14 +41,22 @@ public class ContaController {
         CriarContaCommand command = new CriarContaCommand(
                 request.nomeTitular(),
                 request.cpf(),
-                valorInicial
+                valorInicial,
+                request.senha()
         );
 
         Conta novaConta = criarContaUseCase.executar(command);
 
-        ContaResponse response = contaWebMapper.toResponse(novaConta);
+        String token = tokenService.gerarToken(novaConta.getCpf());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        ContaCriadaResponse response = contaWebMapper.toCriadaResponse(novaConta, token);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(novaConta.getId())
+            .toUri();
+
+        return ResponseEntity.created(location).body(response);
     }
 
     @PostMapping("/{id}/deposito")

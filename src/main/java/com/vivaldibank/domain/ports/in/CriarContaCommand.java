@@ -12,9 +12,10 @@ import java.math.BigDecimal;
 public record CriarContaCommand(
         String titularNome,
         String cpf,
-        BigDecimal depositoInicial
+        BigDecimal depositoInicial,
+        String senha
 ) {
-    
+
     public CriarContaCommand {
         if (titularNome == null || titularNome.isBlank()) {
             throw new IllegalArgumentException("Nome do titular é obrigatório");
@@ -28,7 +29,7 @@ public record CriarContaCommand(
         if (depositoInicial == null || depositoInicial.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Depósito inicial deve ser maior que zero");
         }
-        
+
     }
 
 }

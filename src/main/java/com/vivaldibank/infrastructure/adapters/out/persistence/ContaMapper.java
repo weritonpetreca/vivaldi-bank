@@ -18,6 +18,9 @@ public class ContaMapper {
         entity.setCpf(domain.getCpf());
         entity.setSaldo(domain.getSaldo());
         entity.setCriadoEm(domain.getCriadoEm());
+        entity.setSenha(domain.getSenha());
+        entity.setRole(domain.getRole());
+
 
         List<MovimentacaoEntity> movimentacoesEntity = domain.getMovimentacoes().stream()
                 .map(m -> new MovimentacaoEntity(
@@ -55,7 +58,9 @@ public class ContaMapper {
                 entity.getCpf(),
                 entity.getSaldo(),
                 entity.getCriadoEm(),
-                movimentacoesDomain
+                movimentacoesDomain,
+                entity.getSenha(),
+                entity.getRole()
         );
     }
 }

@@ -7,6 +7,7 @@ import java.util.Optional;
 public interface ContaRepositoryPort {
     Conta salvar(Conta conta);
     Optional<Conta> buscarPorId(String id);
+    Optional<Conta> buscarPorIdParaAlteracao(String id);
     Optional<Conta> buscarPorNumero(String numero);
     Optional<String> buscarUltimoNumeroConta();
 }

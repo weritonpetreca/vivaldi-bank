@@ -17,9 +17,11 @@ public class Conta {
     private String cpf;
     private LocalDateTime criadoEm;
     private List<Movimentacao> movimentacoes = new ArrayList<>();
+    private String senha;
+    private String role;
 
     // Constructor para criar uma NOVA conta (sem ID ainda, saldo zero)
-    public Conta(String numero, String titularNome, String cpf) {
+    public Conta(String numero, String titularNome, String cpf, String senha) {
         this.id = UUID.randomUUID();
         this.numero = numero;
         this.titularNome = titularNome;
@@ -30,13 +32,15 @@ public class Conta {
         }
 
         this.cpf = cpfLimpo;
+        this.senha = senha;
+        this.role = "USER";
         this.saldo = BigDecimal.ZERO;
         this.criadoEm = LocalDateTime.now();
         this.movimentacoes = new ArrayList<>();
     }
 
     // Constructor para RECONSTRUIR uma conta que veio do banco de dados (Adapter vai usar)
-    public Conta(UUID id, String numero, String titularNome, String cpf, BigDecimal saldo, LocalDateTime criadoEm, List<Movimentacao> movimentacoes) {
+    public Conta(UUID id, String numero, String titularNome, String cpf, BigDecimal saldo, LocalDateTime criadoEm, List<Movimentacao> movimentacoes, String senha, String role) {
         this.id = id;
         this.numero = numero;
         this.titularNome = titularNome;
@@ -44,6 +48,8 @@ public class Conta {
         this.saldo = saldo;
         this.criadoEm = criadoEm;
         this.movimentacoes = movimentacoes != null ? movimentacoes : new ArrayList<>();
+        this.senha = senha;
+        this.role = role;
     }
 
     // Comportamentos - Regras de Negócio
@@ -113,4 +119,6 @@ public class Conta {
     public BigDecimal getSaldo() { return saldo; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public List<Movimentacao> getMovimentacoes() { return movimentacoes; }
+    public String getSenha() { return senha; };
+    public String getRole() { return role; };
 }

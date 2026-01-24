@@ -45,3 +45,10 @@ management:
     web:
       exposure:
         include: health, info, prometheus, metrics
+
+logging:
+  level:
+    # Mostra o SQL (select * from...)
+    org.hibernate.SQL: DEBUG
+    # Mostra os parâmetros (o que entra no lugar do ?)
+    org.hibernate.orm.jdbc.bind: TRACE

@@ -42,7 +42,8 @@ class ContaControllerIntegrationTest {
 		CriarContaRequest request = new CriarContaRequest(
 				"Vesemir",
 				"778.253.010-56",
-				new BigDecimal("1000.00")
+				new BigDecimal("1000.00"),
+                "senha123"
 		);
 
 		mockMvc.perform(post("/contas")

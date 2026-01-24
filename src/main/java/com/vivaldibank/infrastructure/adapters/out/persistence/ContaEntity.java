@@ -36,6 +36,12 @@ public class ContaEntity {
     @Column(name = "criado_em", nullable = false)
     private LocalDateTime criadoEm;
 
+    @Column(nullable = false)
+    private String senha;
+
+    @Column(nullable = false)
+    private String role;
+
     @OneToMany(mappedBy = "conta", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<MovimentacaoEntity> movimentacoes = new ArrayList<>();
 

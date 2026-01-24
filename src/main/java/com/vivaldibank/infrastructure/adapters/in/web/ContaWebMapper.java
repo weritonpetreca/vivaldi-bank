@@ -1,6 +1,7 @@
 package com.vivaldibank.infrastructure.adapters.in.web;
 
 import com.vivaldibank.domain.model.Conta;
+import com.vivaldibank.infrastructure.adapters.in.web.dto.ContaCriadaResponse;
 import com.vivaldibank.infrastructure.adapters.in.web.dto.ContaResponse;
 import com.vivaldibank.infrastructure.adapters.in.web.dto.MovimentacaoResponse;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,16 @@ public class ContaWebMapper {
                 conta.getSaldo(),
                 conta.getCriadoEm(),
                 movimentacoes
+        );
+    }
+
+    public ContaCriadaResponse toCriadaResponse(Conta conta, String token) {
+        return new ContaCriadaResponse(
+            conta.getId(),
+            conta.getNumero(),
+            conta.getTitularNome(),
+            conta.getSaldo(),
+            token
         );
     }
 }

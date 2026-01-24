@@ -1,0 +1,27 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Padrão para todos os arquivos
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Arquivos YAML (Geralmente usam 2 espaços, não 4)
+[*.{yml,yaml}]
+indent_size = 2
+
+# Gradle (Kotlin DSL ou Groovy)
+[*.{gradle,gradle.kts}]
+indent_size = 4
+
+# Scripts shell
+[*.sh]
+end_of_line = lf
+indent_style = space
+indent_size = 2
