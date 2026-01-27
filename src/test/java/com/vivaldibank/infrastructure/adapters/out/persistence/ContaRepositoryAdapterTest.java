@@ -33,8 +33,8 @@ class ContaRepositoryAdapterTest {
     @Test
     @DisplayName("Deve salvar uma conta com sucesso")
     void deveSalvarConta() {
-        Conta contaDominio = new Conta("12345", "João Silva", "09331162685");
-        ContaEntity contaEntity = new ContaEntity(UUID.randomUUID(), "12345", BigDecimal.ZERO, "João Silva", "09331162685", LocalDateTime.now(), new ArrayList<>());
+        Conta contaDominio = new Conta("12345", "João Silva", "09331162685", "senha123");
+        ContaEntity contaEntity = new ContaEntity(UUID.randomUUID(), "12345", BigDecimal.ZERO, "João Silva", "09331162685", LocalDateTime.now(), "senha123", "USER", new ArrayList<>());
 
         when(contaMapper.toEntity(contaDominio)).thenReturn(contaEntity);
         when(springRepository.save(contaEntity)).thenReturn(contaEntity);

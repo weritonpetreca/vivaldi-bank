@@ -39,13 +39,19 @@ spring:
       s3:
         path-style-access-enabled: true
 
+# noinspection undefined
+vivaldi:
+  queues:
+    transacoes: transacoes-events
+    clientes: clientes-events
+    login: login-events
+
 # Monitoramento
 management:
   endpoints:
     web:
       exposure:
         include: health, info, prometheus, metrics
-
 logging:
   level:
     # Mostra o SQL (select * from...)

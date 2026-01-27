@@ -1,7 +1,9 @@
 package com.vivaldibank.infrastructure.adapters.in.web;
 
+import com.vivaldibank.domain.ports.out.NotificacaoPort;
 import com.vivaldibank.infrastructure.adapters.in.web.dto.LoginRequest;
 import com.vivaldibank.infrastructure.adapters.in.web.dto.LoginResponse;
+import com.vivaldibank.infrastructure.security.SecurityUser;
 import com.vivaldibank.infrastructure.security.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,7 @@ public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
+    private final NotificacaoPort notificacaoPort;
 
     @PostMapping("/login")
     @Operation(summary = "Realizar login", description = "Autentica o usuário via CPF e Senha e retorna um token JWT")
@@ -41,12 +43,17 @@ public class AuthenticationController {
         // Se a senha estiver errada, ele lança uma Exception e retorna 403 Forbidden automaticamente
         Authentication auth = authenticationManager.authenticate(authenticationToken);
 
+        SecurityUser usuarioLogado = (SecurityUser) auth.getPrincipal();
+
         // 3. Se passou da linha acima a senha está correta
         // Extrai o principal (usuário logado) de forma limpa
         // getName() retorna o "username" (que no nosso caso é o CPF) configurado no UserDetails
-        String cpfAutenticado = auth.getName();
+        String cpf = usuarioLogado.getUsername();
+        String idConta = usuarioLogado.getIdConta().toString();
 
-        String tokenJWT = tokenService.gerarToken(cpfAutenticado);
+        String tokenJWT = tokenService.gerarToken(cpf);
+
+        notificacaoPort.notificarLogin(idConta, cpf);
 
         return ResponseEntity.ok(new LoginResponse(tokenJWT));
     }

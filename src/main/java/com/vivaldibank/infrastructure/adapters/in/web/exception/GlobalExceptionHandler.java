@@ -1,8 +1,10 @@
 package com.vivaldibank.infrastructure.adapters.in.web.exception;
 
 import com.vivaldibank.domain.model.exception.ContaNaoEncontradaException;
+import com.vivaldibank.domain.model.exception.CpfJaCadastradoException;
 import com.vivaldibank.domain.model.exception.NumeroNaoEncontradoException;
 import com.vivaldibank.domain.model.exception.SaldoInsuficienteException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +52,25 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail dandleDataIntegrityViolation(DataIntegrityViolationException ex) {
+
+        String mensagemErro = ex.getMostSpecificCause().getMessage();
+
+        if (mensagemErro != null && mensagemErro.contains("cpf")) {
+            return criarProblema(
+                HttpStatus.CONFLICT,
+                "Conflito de Dados",
+                "O CPF informado já possui cadastro no Vivaldi Bank."
+            );
+        }
+        return criarProblema(
+            HttpStatus.CONFLICT,
+            "Conflito de Dados",
+            "A operação viola uma regra de integridade de dados (ex: campo único duplicado)."
+        );
     }
 
     @ExceptionHandler(Exception.class)
@@ -108,5 +129,21 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(problemDetail);
+    }
+
+    @ExceptionHandler(CpfJaCadastradoException.class)
+    public ProblemDetail handleCpfJaCadastrado(CpfJaCadastradoException ex) {
+        return criarProblema(
+            HttpStatus.CONFLICT,
+            "CPF já cadastrado",
+            "O CPF informado já possui cadastro no Vivaldi Bank."
+        );
+    }
+
+    private ProblemDetail criarProblema(HttpStatus status, String titulo, String detalhe) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detalhe);
+        problemDetail.setTitle(titulo);
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
     }
 }

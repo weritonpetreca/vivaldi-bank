@@ -21,4 +21,6 @@ public interface SpringDataContaRepository extends JpaRepository<ContaEntity, UU
     Optional<String> findUltimoNumeroConta();
 
     Optional<ContaEntity> findByCpf(String cpf);
+
+    boolean existsByCpf(String cpf);
 }

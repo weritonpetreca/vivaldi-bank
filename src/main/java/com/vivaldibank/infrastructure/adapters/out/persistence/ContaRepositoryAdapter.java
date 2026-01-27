@@ -49,4 +49,9 @@ public class ContaRepositoryAdapter implements ContaRepositoryPort {
     public Optional<String> buscarUltimoNumeroConta() {
         return springRepository.findUltimoNumeroConta();
     }
+
+    @Override
+    public boolean existePorCpf(String cpf) {
+        return springRepository.existsByCpf(cpf);
+    }
 }

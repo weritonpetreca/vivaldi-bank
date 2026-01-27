@@ -27,6 +27,7 @@ repositories {
 dependencies {
     implementation("com.auth0:java-jwt:4.4.0")
     implementation("io.awspring.cloud:spring-cloud-aws-starter:3.1.0")
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-sqs:3.1.0")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4")
@@ -37,7 +38,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
 	compileOnly("org.projectlombok:lombok")
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
+//	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	runtimeOnly("io.micrometer:micrometer-registry-prometheus")
 	runtimeOnly("org.postgresql:postgresql")

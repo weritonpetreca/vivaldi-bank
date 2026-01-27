@@ -24,12 +24,6 @@ public class AutenticacaoService implements UserDetailsService {
         var contaEntity = repository.findByCpf(cpf)
             .orElseThrow(() -> new UsernameNotFoundException("Conta não encontrada com CPF: " + cpf));
 
-        // 2. Transforma a ContaEntity em um User do Spring Security
-        // O Spring vai usar essa senha e role para checar se o login está certo
-        return User.builder()
-            .username(contaEntity.getCpf())
-            .password(contaEntity.getSenha()) // O Spring compara esse Hash com a senha enviada
-            .roles(contaEntity.getRole())     // Ex: "CLIENTE" vira "ROLE_CLIENTE"
-            .build();
+        return new SecurityUser(contaEntity);
     }
 }

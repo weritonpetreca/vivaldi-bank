@@ -1,9 +1,11 @@
 package com.vivaldibank.application.usecases;
 
 import com.vivaldibank.domain.model.Conta;
+import com.vivaldibank.domain.model.exception.CpfJaCadastradoException;
 import com.vivaldibank.domain.ports.in.CriarContaCommand;
 import com.vivaldibank.domain.ports.in.CriarContaUseCasePort;
 import com.vivaldibank.domain.ports.out.ContaRepositoryPort;
+import com.vivaldibank.domain.ports.out.NotificacaoPort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
@@ -13,13 +15,20 @@ import java.util.Optional;
 public class CriarContaUseCase implements CriarContaUseCasePort {
 
     private final ContaRepositoryPort contaRepository;
+    private final NotificacaoPort notificacaoPort;
 
-    public CriarContaUseCase(ContaRepositoryPort contaRepository) {
+    public CriarContaUseCase(ContaRepositoryPort contaRepository, NotificacaoPort notificacaoPort) {
         this.contaRepository = contaRepository;
+        this.notificacaoPort = notificacaoPort;
     }
 
     @Override
     public Conta executar(CriarContaCommand command) {
+
+        if (contaRepository.existePorCpf(command.cpf())) {
+            throw new CpfJaCadastradoException(command.cpf());
+        }
+
         String novoNumero = gerarProximoNumero();
 
         String senhaCriptografada = new BCryptPasswordEncoder().encode(command.senha());
@@ -35,7 +44,11 @@ public class CriarContaUseCase implements CriarContaUseCasePort {
             novaConta.depositar(command.depositoInicial());
         }
 
-        return contaRepository.salvar(novaConta);
+        Conta contaSalva = contaRepository.salvar(novaConta);
+
+        notificacaoPort.notificarCriacao(contaSalva);
+
+        return contaSalva;
     }
 
     private String gerarProximoNumero() {
