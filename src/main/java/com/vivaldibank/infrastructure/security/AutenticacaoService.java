@@ -1,7 +1,6 @@
 package com.vivaldibank.infrastructure.security;
 
 import com.vivaldibank.infrastructure.adapters.out.persistence.SpringDataContaRepository;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

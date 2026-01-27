@@ -28,7 +28,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .csrf(csrf -> csrf.disable()) // Desabilita proteção contra ataque de formulário (Inútil em API REST Stateless)
+                .csrf(AbstractHttpConfigurer::disable) // Desabilita proteção contra ataque de formulário (Inútil em API REST Stateless)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Diz ao Spring "Não guarde sessão/cookies"
                 .authorizeHttpRequests(authorize -> authorize
                     // Rotas Públicas (Qualquer um acessa)

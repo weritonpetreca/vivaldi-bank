@@ -5,6 +5,8 @@ import com.vivaldibank.application.usecases.*;
 import com.vivaldibank.domain.model.Conta;
 import com.vivaldibank.domain.ports.in.CriarContaCommand;
 import com.vivaldibank.infrastructure.adapters.in.web.dto.CriarContaRequest;
+import com.vivaldibank.infrastructure.adapters.out.persistence.SpringDataContaRepository;
+import com.vivaldibank.infrastructure.security.TokenService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,12 @@ class ContaControllerTest {
     @MockitoBean
     private RealizarTransferenciaUseCase realizarTransferenciaUseCase;
 
+    @MockitoBean
+    private TokenService tokenService;
+
+    @MockitoBean
+    private SpringDataContaRepository contaRepository;
+
     @Test
     @DisplayName("Deve criar uma conta com sucesso e retornar status 201")
     void deveCriarContaComSucesso() throws Exception {
@@ -59,15 +67,18 @@ class ContaControllerTest {
         CriarContaRequest request = new CriarContaRequest("Geralt de Rivia", "09331162685", BigDecimal.ZERO, "senha123");
         Conta contaCriada = new Conta("20260001", "Geralt de Rivia", "09331162685", "senha123");
 
+        when(tokenService.gerarToken(any())).thenReturn("token-jwt-fake");
+
         when(criarContaUseCase.executar(any(CriarContaCommand.class))).thenReturn(contaCriada);
 
         mockMvc.perform(post("/contas")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.numero").value("20260001"))
+                .andExpect(jsonPath("$.numeroConta").value("20260001"))
                 .andExpect(jsonPath("$.titularNome").value("Geralt de Rivia"))
-                .andExpect(jsonPath("$.saldo").value(0));
+                .andExpect(jsonPath("$.saldo").value(0))
+                .andExpect(jsonPath("$.token").value("token-jwt-fake"));
     }
 
     @Test

@@ -1,15 +1,9 @@
 package com.vivaldibank.infrastructure.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.awspring.cloud.sqs.config.SqsMessageListenerContainerFactory;
-import io.awspring.cloud.sqs.operations.SqsTemplate;
-import io.awspring.cloud.sqs.support.converter.SqsMessagingMessageConverter;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.QueueNameExistsException;
@@ -31,9 +25,14 @@ public class SqsConfiguration {
     @PostConstruct
     public void criarFilasAoIniciar() {
         logger.info("Verificando existência das filas SQS...");
-        criarFila(properties.transacoes());
-        criarFila(properties.clientes());
-        criarFila(properties.login());
+        try {
+            criarFila(properties.transacoes());
+            criarFila(properties.clientes());
+            criarFila(properties.login());
+        } catch (Exception e) {
+            logger.error("NÃO FOI POSSIVEL CONECTAR AO LOCALSTACK. " +
+                "As filas não foram criadas. Erro: {}", e.getMessage());
+        }
     }
 
 

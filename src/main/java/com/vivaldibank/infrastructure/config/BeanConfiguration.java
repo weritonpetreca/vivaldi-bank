@@ -3,6 +3,7 @@ package com.vivaldibank.infrastructure.config;
 import com.vivaldibank.application.usecases.*;
 import com.vivaldibank.domain.ports.out.ContaRepositoryPort;
 import com.vivaldibank.domain.ports.out.NotificacaoPort;
+import com.vivaldibank.domain.ports.out.PasswordEncoderPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,8 +23,9 @@ public class BeanConfiguration {
     @Bean
     public CriarContaUseCase criarContaUseCase(
             ContaRepositoryPort contaRepositoryPort,
-            NotificacaoPort notificacaoPort) {
-        return new CriarContaUseCase(contaRepositoryPort, notificacaoPort);
+            NotificacaoPort notificacaoPort,
+            PasswordEncoderPort passwordEncoderPort) {
+        return new CriarContaUseCase(contaRepositoryPort, notificacaoPort, passwordEncoderPort);
     }
 
     @Bean

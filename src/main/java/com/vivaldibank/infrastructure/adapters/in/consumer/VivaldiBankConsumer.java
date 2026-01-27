@@ -1,14 +1,11 @@
 package com.vivaldibank.infrastructure.adapters.in.consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vivaldibank.infrastructure.events.EventoContaCriada;
 import com.vivaldibank.infrastructure.events.EventoLogin;
 import com.vivaldibank.infrastructure.events.EventoMovimentacao;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 

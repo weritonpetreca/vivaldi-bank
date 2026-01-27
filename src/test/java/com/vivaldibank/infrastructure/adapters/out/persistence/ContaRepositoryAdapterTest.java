@@ -1,7 +1,6 @@
 package com.vivaldibank.infrastructure.adapters.out.persistence;
 
 import com.vivaldibank.domain.model.Conta;
-import com.vivaldibank.domain.model.Movimentacao;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
