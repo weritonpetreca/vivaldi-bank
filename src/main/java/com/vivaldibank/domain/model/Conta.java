@@ -27,7 +27,7 @@ public class Conta {
         this.titularNome = titularNome;
 
         String cpfLimpo = (cpf != null) ? cpf.replaceAll("\\D","") : null;
-        if (cpfLimpo == null || !CpfValidator.isValid(cpfLimpo)) {
+        if (!CpfValidator.isValid(cpfLimpo)) {
             throw new IllegalArgumentException("CPF inválido");
         }
 
@@ -36,7 +36,6 @@ public class Conta {
         this.role = "USER";
         this.saldo = BigDecimal.ZERO;
         this.criadoEm = LocalDateTime.now();
-        this.movimentacoes = new ArrayList<>();
     }
 
     // Constructor para RECONSTRUIR uma conta que veio do banco de dados (Adapter vai usar)
@@ -119,6 +118,6 @@ public class Conta {
     public BigDecimal getSaldo() { return saldo; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public List<Movimentacao> getMovimentacoes() { return movimentacoes; }
-    public String getSenha() { return senha; };
-    public String getRole() { return role; };
+    public String getSenha() { return senha; }
+    public String getRole() { return role; }
 }

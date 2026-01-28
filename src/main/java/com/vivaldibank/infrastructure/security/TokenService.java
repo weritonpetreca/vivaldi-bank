@@ -16,7 +16,7 @@ public class TokenService {
 
     // Em produção, isso vem de variável de ambiente (application.yml)
     // Por enquanto, deixamos fixo para facilitar
-    @Value("{api.security.token.secret:segredo-bruxo}")
+    @Value("${vivaldi.security.secret:segredo-bruxo}")
     private String secret;
 
     private static final String ISSUER = "vivaldi-bank-api";
@@ -37,8 +37,9 @@ public class TokenService {
     public String validarToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
+
             return JWT.require(algorithm)
-                .withIssuer("vivaldi-bank-api")
+                .withIssuer(ISSUER)
                 .build()
                 .verify(token)                          // Se for inválido, lança exceção
                 .getSubject();                          // Retorna o CPF que estava dentro do token

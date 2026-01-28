@@ -1,18 +1,24 @@
 version: '3.8'
 
 services:
+
   #Banco de Dados
   postgres:
     image: postgres:16-alpine
     container_name: vivaldi-db
     environment:
+      POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   #AWS Simulada
@@ -34,6 +40,30 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  # Coletor de métricas
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: vivaldi-prometheus
+    volumes:
+      - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml # Mapeia o arquivo que criamos
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Permite que o Prometheus acessa a API no host
+    restart: always
+
+  #Dashboard visual
+  grafana:
+    image: grafana/grafana:latest
+    container_name: 'vivaldi-grafana'
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD} # Senha inicial
+    depends_on:
+      - prometheus
+    restart: always
 
 
 volumes:

@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 5s # Coleta métrica a cada 5 segundos
+
+scrape_configs:
+  - job_name: 'vivaldi-bank-api'
+    metrics_path: '/actuator/prometheus' # O caminho que o Spring Boot expõe
+    static_configs:
+      - targets: ['host.docker.internal:8080'] # Aponta para a sua API rodando no host ou container

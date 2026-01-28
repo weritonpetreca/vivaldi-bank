@@ -41,3 +41,19 @@ jobs:
         with:
           name: test-report
           path: build/reports/tests/test/
+
+      # 6. Configura o Docker Buildx (Ferramenta moderna de build)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 7. Constrói a imagem Docker (apenas Build, sem Push por enquanto)
+      - name: Build Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: false #Mudaremos para 'true' quando tiversmo um Registry
+          tags: vivaldi-bank-api:latest
+          #Otimização: Cacheia as camadas para o build ficar rápido
+          cache-form: type=gha
+          cache-to: type=gha,mode=max
