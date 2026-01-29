@@ -1,0 +1,90 @@
+# ==============================================================================
+# GRIMÓRIO DE CONFIGURAÇÃO (TEMPLATE) - VIVALDI BANK
+# ==============================================================================
+# ESTE ARQUIVO É UMA REFERÊNCIA DE APRENDIZADO.
+# Ele mostra como a aplicação se comporta de forma híbrida (Local vs Nuvem)
+# usando injeção de variáveis de ambiente com valores padrão (Defaults).
+#
+# SINTAXE: ${NOME_VARIAVEL:valor_padrao_se_variavel_nao_existir}
+# ==============================================================================
+
+server:
+  port: 8080 # Porta padrão do container/aplicação
+
+spring:
+  application:
+    name: vivaldi-bank
+
+  # --- CONEXÃO COM O BANCO DE DADOS ---
+  # Aqui usamos a flexibilidade máxima.
+  # Se rodar no IntelliJ sem configurar nada, ele assume 'localhost' e porta '5432'.
+  # Se rodar no Docker ou AWS, injetamos DB_HOST e os valores mudam automaticamente.
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:vivaldi_bank}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  # --- COMPORTAMENTO DO HIBERNATE ---
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      # 'validate': Confere se o banco bate com o código Java.
+      # Em dev, as vezes usamos 'update', mas 'validate' é mais seguro para prod.
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # --- MIGRAÇÃO DE DADOS (FLYWAY) ---
+  # Garante que o banco seja versionado e evolua de forma controlada.
+  flyway:
+    enabled: true
+    baseline-on-migrate: true # Se o banco já existir sem flyway, ele cria a base.
+
+  # --- CONFIGURAÇÃO HÍBRIDA AWS / LOCALSTACK ---
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: ${AWS_ACCESS_KEY:test} # 'test' é o padrão do LocalStack
+        secret-key: ${AWS_SECRET_KEY:test}
+
+      # [PONTO CRÍTICO DE APRENDIZADO]
+      # Esta linha define se usamos o LocalStack ou a AWS Real.
+      # LOCAL: Deixamos vazio ou não definimos, ele usa 'http://localhost:4566'
+      # PROD (AWS): Precisamos definir AWS_ENDPOINT como vazio ou tratar via Profile,
+      # caso contrário o SDK tentará conectar no localhost dentro da AWS e falhará.
+      endpoint: ${AWS_ENDPOINT:http://localhost:4566}
+
+      s3:
+        path-style-access-enabled: true # Necessário para compatibilidade com LocalStack/MinIO
+
+# --- CONFIGURAÇÕES PERSONALIZADAS DO VIVALDI BANK ---
+# noinspection undefined
+vivaldi:
+  queues:
+    transacoes: transacoes-events
+    clientes: clientes-events
+    login: login-events
+  security:
+    # Segredo do Token JWT. Em produção, isso DEVE vir via variável de ambiente.
+    jwt-secret: ${JWT_SECRET:senha_padrao_dev}
+
+# --- OBSERVABILIDADE E MONITORAMENTO ---
+# Essencial para ambientes Cloud (Kubernetes/ECS) saberem se a app está viva.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus, metrics
+
+# --- LOGS PARA DEBUG ---
+logging:
+  level:
+    # Mostra o SQL gerado (select * from...)
+    org.hibernate.SQL: DEBUG
+    # Mostra os valores reais que substituem os '?' no SQL
+    org.hibernate.orm.jdbc.bind: TRACE

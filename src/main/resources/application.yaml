@@ -1,18 +1,18 @@
+# ==============================================================================
+# CONFIGURAÇÕES GERAIS (BASE - COMUM A TODOS)
+# ==============================================================================
 server:
   port: 8080
 
 spring:
   application:
     name: vivaldi-bank
-
-  # Conexão com o banco de dados (PostgreSQL)
   datasource:
-    url: jdbc:postgresql://${DB_HOST:5432}:${DB_PORT:5432}/${DB_NAME:vivaldi_bank}
+    # URL dinâmica: Em dev local usa localhost, em prod/docker usa a env DB_HOST
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:vivaldi_bank}
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
-
-  # JPA & Hibernate
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -21,25 +21,19 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
-  # Migration (Flyway)
   flyway:
     enabled: true
     baseline-on-migrate: true
 
-  # Config AWS
-  cloud:
-    aws:
-      region:
-        static: us-east-1
-      credentials:
-        access-key: ${AWS_ACCESS_KEY:test}
-        secret-key: ${AWS_SECRET_KEY:test}
-      endpoint: ${AWS_ENDPOINT:http://localhost:4566}
-      s3:
-        path-style-access-enabled: true
+# Configurações AWS Padrão (Base)
+cloud:
+  aws:
+    region:
+      static: us-east-1
+    credentials:
+      access-key: ${AWS_ACCESS_KEY} # Em prod, isso vem da ENV real
+      secret-key: ${AWS_SECRET_KEY} # Em prod, isso vem da ENV real
 
-# noinspection undefined
 vivaldi:
   queues:
     transacoes: transacoes-events
@@ -48,15 +42,53 @@ vivaldi:
   security:
     jwt-secret: ${JWT_SECRET:senha_padrao_dev}
 
-# Monitoramento
 management:
   endpoints:
     web:
       exposure:
         include: health, info, prometheus, metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+---
+# ==============================================================================
+# PERFIL: DEV (LocalStack)
+# Ativado com: SPRING_PROFILES_ACTIVE=dev
+# ==============================================================================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+cloud:
+  aws:
+    # AQUI ESTÁ O SEGREDO: Em DEV, apontamos para o LocalStack
+    endpoint: ${AWS_ENDPOINT:http://localhost:4566}
+    credentials:
+      access-key: test
+      secret-key: test
+
 logging:
   level:
-    # Mostra o SQL (select * from...)
+    root: INFO
+    com.vivaldibank: DEBUG
     org.hibernate.SQL: DEBUG
-    # Mostra os parâmetros (o que entra no lugar do ?)
-    org.hibernate.orm.jdbc.bind: TRACE
+
+---
+# ==============================================================================
+# PERFIL: PROD (AWS Real)
+# Ativado com: SPRING_PROFILES_ACTIVE=prod
+# ==============================================================================
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+# Em PROD, NÃO definimos 'cloud.aws.endpoint'.
+# Assim, o SDK da AWS usa automaticamente os endereços reais (sqs.us-east-1.amazonaws.com).
+
+logging:
+  level:
+    root: INFO
+    com.vivaldibank: INFO # Menos log em produção para performance
