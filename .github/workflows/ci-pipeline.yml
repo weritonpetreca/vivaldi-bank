@@ -3,7 +3,7 @@ name: Java CI with Gradle
 # Quando esse pipeline vai rodar?
 on:
   push:
-    branches: [ "main" "reafactor/**"]
+    branches: [ "main", "refactor/**" ]
   pull_request:
     branches: [ "main" ]
 
@@ -51,7 +51,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: {{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
       # 8. Login no Amazon ECR
@@ -66,7 +66,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: {{ steps.login-ecr.outputs.registry }}/vivaldi-bank-api:latest
+          tags: ${{ steps.login-ecr.outputs.registry }}/vivaldi-bank-api:latest
           #Otimização: Cacheia as camadas para o build ficar rápido
           cache-from: type=gha
           cache-to: type=gha,mode=max
