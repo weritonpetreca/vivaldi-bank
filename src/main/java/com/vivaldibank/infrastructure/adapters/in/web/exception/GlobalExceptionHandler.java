@@ -1,13 +1,14 @@
 package com.vivaldibank.infrastructure.adapters.in.web.exception;
 
-import com.vivaldibank.domain.model.exception.ContaNaoEncontradaException;
-import com.vivaldibank.domain.model.exception.CpfJaCadastradoException;
-import com.vivaldibank.domain.model.exception.NumeroNaoEncontradoException;
-import com.vivaldibank.domain.model.exception.SaldoInsuficienteException;
+import com.vivaldibank.domain.model.exceptions.ContaNaoEncontradaException;
+import com.vivaldibank.domain.model.exceptions.CpfJaCadastradoException;
+import com.vivaldibank.domain.model.exceptions.NumeroNaoEncontradoException;
+import com.vivaldibank.domain.model.exceptions.SaldoInsuficienteException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +18,8 @@ import java.time.Instant;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final String TIMESTAMP = "timestamp";
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ProblemDetail> handleDomainError(IllegalArgumentException ex) {
@@ -28,7 +31,7 @@ public class GlobalExceptionHandler {
 
         problemDetail.setTitle("Erro de Regra de Negócio");
         problemDetail.setType(URI.create("https://vivaldibank.com/erros/regra-de-negocio"));
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(problemDetail);
     }
@@ -49,13 +52,13 @@ public class GlobalExceptionHandler {
 
         problemDetail.setTitle("Erro de Validação de Dados");
         problemDetail.setProperty("detalhes", errors.toString());
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ProblemDetail dandleDataIntegrityViolation(DataIntegrityViolationException ex) {
+    public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
 
         String mensagemErro = ex.getMostSpecificCause().getMessage();
 
@@ -82,7 +85,7 @@ public class GlobalExceptionHandler {
         );
 
         problemDetail.setTitle("Erro Interno");
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
 
         ex.printStackTrace();
 
@@ -98,7 +101,7 @@ public class GlobalExceptionHandler {
         );
 
         problemDetail.setTitle("Recurso não encontrado");
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
     }
@@ -112,7 +115,7 @@ public class GlobalExceptionHandler {
         );
 
         problemDetail.setTitle("Número da conta não encontrada");
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
     }
@@ -126,7 +129,7 @@ public class GlobalExceptionHandler {
         );
 
         problemDetail.setTitle("Saldo insuficiente");
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(problemDetail);
     }
@@ -140,10 +143,19 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    public ProblemDetail handleBadCredentials(BadCredentialsException ex) {
+        return criarProblema(
+            HttpStatus.UNAUTHORIZED,
+            "Credenciais inválidas",
+            "Usuário ou senha inválidos."
+        );
+    }
+
     private ProblemDetail criarProblema(HttpStatus status, String titulo, String detalhe) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detalhe);
         problemDetail.setTitle(titulo);
-        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty(TIMESTAMP, Instant.now());
         return problemDetail;
     }
 }

@@ -1,4 +1,4 @@
-package com.vivaldibank.domain.model.exception;
+package com.vivaldibank.domain.model.exceptions;
 
 public class NumeroNaoEncontradoException extends RuntimeException {
 

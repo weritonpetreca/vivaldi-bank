@@ -8,12 +8,10 @@ import com.vivaldibank.infrastructure.security.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.math.BigDecimal;
 import java.net.URI;
 
 @RestController
@@ -34,20 +32,16 @@ public class ContaController {
     @Operation(summary = "Criar nova conta", description = "Criar uma conta e já retorna o Token de acesso (Auto-Login.")
     public ResponseEntity<ContaCriadaResponse> criarConta(@RequestBody @Valid CriarContaRequest request) {
 
-        BigDecimal valorInicial = request.depositoInicial() != null
-                ? request.depositoInicial()
-                : BigDecimal.ZERO;
-
         CriarContaCommand command = new CriarContaCommand(
                 request.nomeTitular(),
                 request.cpf(),
-                valorInicial,
+                request.depositoInicial(),
                 request.senha()
         );
 
         Conta novaConta = criarContaUseCase.executar(command);
 
-        String token = tokenService.gerarToken(novaConta.getCpf());
+        String token = tokenService.gerarToken(novaConta.getCpf().getNumero());
 
         ContaCriadaResponse response = contaWebMapper.toCriadaResponse(novaConta, token);
 

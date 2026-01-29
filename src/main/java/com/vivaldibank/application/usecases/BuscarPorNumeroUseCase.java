@@ -1,7 +1,7 @@
 package com.vivaldibank.application.usecases;
 
 import com.vivaldibank.domain.model.Conta;
-import com.vivaldibank.domain.model.exception.NumeroNaoEncontradoException;
+import com.vivaldibank.domain.model.exceptions.NumeroNaoEncontradoException;
 import com.vivaldibank.domain.ports.out.ContaRepositoryPort;
 
 public class BuscarPorNumeroUseCase {

@@ -31,10 +31,12 @@ public class AuthenticationController {
     @PostMapping("/login")
     @Operation(summary = "Realizar login", description = "Autentica o usuário via CPF e Senha e retorna um token JWT")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+
+        String cleanCpf = request.cpf().replaceAll("\\D", "");
         // 1. Encapsulamos as credenciais (CPF e Senha plana) em um objeto do Spring
         // Lembre-se UsernamePasswordAuthenticationToken não é o JWT, é só um "envelope" de credenciais
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-            request.cpf(),
+            cleanCpf,
             request.senha()
         );
 

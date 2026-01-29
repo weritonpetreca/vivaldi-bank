@@ -7,5 +7,6 @@ public record LoginRequest(
     String cpf,
 
     @NotBlank
-    String senha
-) {}
+    String senha) {
+
+}

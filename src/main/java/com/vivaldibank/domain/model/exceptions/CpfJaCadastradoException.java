@@ -1,4 +1,4 @@
-package com.vivaldibank.domain.model.exception;
+package com.vivaldibank.domain.model.exceptions;
 
 public class CpfJaCadastradoException extends RuntimeException {
     public CpfJaCadastradoException(String cpf) {

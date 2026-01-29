@@ -1,7 +1,8 @@
 package com.vivaldibank.application.usecases;
 
 import com.vivaldibank.domain.model.Conta;
-import com.vivaldibank.domain.model.exception.CpfJaCadastradoException;
+import com.vivaldibank.domain.model.Cpf;
+import com.vivaldibank.domain.model.exceptions.CpfJaCadastradoException;
 import com.vivaldibank.domain.ports.in.CriarContaCommand;
 import com.vivaldibank.domain.ports.out.ContaRepositoryPort;
 import com.vivaldibank.domain.ports.out.NotificacaoPort;
@@ -65,7 +66,7 @@ class CriarContaUseCaseTest {
             idFixo,
             "20260001",
             "Dandelion",
-            "09331162685",
+            new Cpf("09331162685"),
             BigDecimal.TEN,
             LocalDateTime.now(),
             new ArrayList<>(),

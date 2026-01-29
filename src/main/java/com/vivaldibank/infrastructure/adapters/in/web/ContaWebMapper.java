@@ -27,7 +27,7 @@ public class ContaWebMapper {
                 conta.getId() != null ? conta.getId().toString() : null,
                 conta.getNumero(),
                 conta.getTitularNome(),
-                conta.getCpf(),
+                conta.getCpf().getNumero(),
                 conta.getSaldo(),
                 conta.getCriadoEm(),
                 movimentacoes

@@ -1,7 +1,8 @@
 package com.vivaldibank.application.usecases;
 
 import com.vivaldibank.domain.model.Conta;
-import com.vivaldibank.domain.model.exception.CpfJaCadastradoException;
+import com.vivaldibank.domain.model.Cpf;
+import com.vivaldibank.domain.model.exceptions.CpfJaCadastradoException;
 import com.vivaldibank.domain.ports.in.CriarContaCommand;
 import com.vivaldibank.domain.ports.in.CriarContaUseCasePort;
 import com.vivaldibank.domain.ports.out.ContaRepositoryPort;
@@ -30,10 +31,10 @@ public class CriarContaUseCase implements CriarContaUseCasePort {
     @Override
     public Conta executar(CriarContaCommand command) {
 
-        String cpfLimpo = command.cpf().replaceAll("\\D", "");
+        Cpf cpf = new Cpf(command.cpf());
 
-        if (contaRepository.existePorCpf(cpfLimpo)) {
-            throw new CpfJaCadastradoException(cpfLimpo);
+        if (contaRepository.existePorCpf(cpf.getNumero())) {
+            throw new CpfJaCadastradoException(cpf.getNumero());
         }
 
         String novoNumero = gerarProximoNumero();
@@ -43,7 +44,7 @@ public class CriarContaUseCase implements CriarContaUseCasePort {
         Conta novaConta = new Conta(
             novoNumero,
             command.titularNome(),
-            cpfLimpo,
+            cpf,
             senhaCriptografada
         );
 

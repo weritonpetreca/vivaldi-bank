@@ -1,6 +1,6 @@
 package com.vivaldibank.domain.model;
 
-import com.vivaldibank.domain.model.exception.SaldoInsuficienteException;
+import com.vivaldibank.domain.model.exceptions.SaldoInsuficienteException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,41 +14,67 @@ public class Conta {
     private String numero;
     private BigDecimal saldo;
     private String titularNome;
-    private String cpf;
+    private Cpf cpf;
     private LocalDateTime criadoEm;
     private List<Movimentacao> movimentacoes = new ArrayList<>();
     private String senha;
     private String role;
 
+    // Construtor privado para forçar o uso do Builder ou Factory Method
+    private Conta(Builder builder) {
+        this.id = builder.id;
+        this.numero = builder.numero;
+        this.titularNome = builder.titularNome;
+        this.cpf = builder.cpf;
+        this.saldo = builder.saldo;
+        this.criadoEm = builder.criadoEm;
+        this.movimentacoes = builder.movimentacoes != null ? builder.movimentacoes : new ArrayList<>();
+        this.senha = builder.senha;
+        this.role = builder.role;
+    }
+
     // Constructor para criar uma NOVA conta (sem ID ainda, saldo zero)
-    public Conta(String numero, String titularNome, String cpf, String senha) {
+    public Conta(String numero, String titularNome, Cpf cpf, String senha) {
         this.id = UUID.randomUUID();
         this.numero = numero;
         this.titularNome = titularNome;
-
-        String cpfLimpo = (cpf != null) ? cpf.replaceAll("\\D","") : null;
-        if (!CpfValidator.isValid(cpfLimpo)) {
-            throw new IllegalArgumentException("CPF inválido");
-        }
-
-        this.cpf = cpfLimpo;
+        this.cpf = cpf;
         this.senha = senha;
         this.role = "USER";
         this.saldo = BigDecimal.ZERO;
         this.criadoEm = LocalDateTime.now();
     }
 
-    // Constructor para RECONSTRUIR uma conta que veio do banco de dados (Adapter vai usar)
-    public Conta(UUID id, String numero, String titularNome, String cpf, BigDecimal saldo, LocalDateTime criadoEm, List<Movimentacao> movimentacoes, String senha, String role) {
-        this.id = id;
-        this.numero = numero;
-        this.titularNome = titularNome;
-        this.cpf = (cpf != null) ? cpf.replaceAll("\\D","") : null;
-        this.saldo = saldo;
-        this.criadoEm = criadoEm;
-        this.movimentacoes = movimentacoes != null ? movimentacoes : new ArrayList<>();
-        this.senha = senha;
-        this.role = role;
+    // Static Factory Method para iniciar o Builder
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    // Classe Builder interna
+    public static class Builder {
+        private UUID id;
+        private String numero;
+        private BigDecimal saldo;
+        private String titularNome;
+        private Cpf cpf;
+        private LocalDateTime criadoEm;
+        private List<Movimentacao> movimentacoes;
+        private String senha;
+        private String role;
+
+        public Builder id(UUID id) { this.id = id; return this; }
+        public Builder numero(String numero) { this.numero = numero; return this; }
+        public Builder saldo(BigDecimal saldo) { this.saldo = saldo; return this; }
+        public Builder titularNome(String titularNome) { this.titularNome = titularNome; return this; }
+        public Builder cpf(Cpf cpf) { this.cpf = cpf; return this; }
+        public Builder criadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; return this; }
+        public Builder movimentacoes(List<Movimentacao> movimentacoes) { this.movimentacoes = movimentacoes; return this; }
+        public Builder senha(String senha) { this.senha = senha; return this; }
+        public Builder role(String role) { this.role = role; return this; }
+
+        public Conta build() {
+            return new Conta(this);
+        }
     }
 
     // Comportamentos - Regras de Negócio
@@ -114,7 +140,7 @@ public class Conta {
     public UUID getId() { return id; }
     public String getNumero() { return numero; }
     public String getTitularNome() { return titularNome; }
-    public String getCpf() { return cpf; }
+    public Cpf getCpf() { return cpf; }
     public BigDecimal getSaldo() { return saldo; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public List<Movimentacao> getMovimentacoes() { return movimentacoes; }
