@@ -56,3 +56,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Scripts Locais (Segurança)
+run_app.sh
+!run_app.template.sh
