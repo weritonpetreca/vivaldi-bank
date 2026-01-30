@@ -6,28 +6,35 @@
 ![AWS SQS](https://img.shields.io/badge/AWS_SQS-Event_Driven-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
 ![Security](https://img.shields.io/badge/Security-JWT_&_BCrypt-red?style=for-the-badge&logo=spring-security&logoColor=white)
+![Quality](https://img.shields.io/badge/Quality-Qodana_%2B_ArchUnit-25A162?style=for-the-badge&logo=jetbrains&logoColor=white)
 
 > *"O código é como uma espada de prata: precisa ser afiado, leve e mortal contra bugs."*
 
-Bem-vindo a **Kaer Morhen**, ou melhor, ao repositório do **Vivaldi Bank**. Este projeto é uma API financeira robusta, forjada para suportar alta concorrência e escalabilidade, preparada tanto para o ambiente simulado (**LocalStack**) quanto para o mundo real (**AWS Cloud**).
+Bem-vindo a **Kaer Morhen**, a fortaleza digital do **Vivaldi Bank**. Esta é uma API financeira Enterprise, forjada para suportar alta concorrência, escalabilidade e segurança bancária. O projeto segue estritamente as melhores práticas de Engenharia de Software, preparado para rodar tanto em simulações locais (**LocalStack**) quanto no campo de batalha real (**AWS Cloud**).
 
 ---
 
-## 🏰 Arquitetura (O Projeto da Fortaleza)
+## 🏰 Arquitetura (O Diagrama da Fortaleza)
 
-Este sistema foi forjado seguindo estritamente a **Arquitetura Hexagonal (Ports & Adapters)**. O objetivo é blindar as Regras de Negócio (Domínio) contra mudanças externas, garantindo longevidade e testabilidade.
+Este sistema foi construído sobre os pilares da **Arquitetura Hexagonal (Ports & Adapters)**. O Domínio (Regras de Negócio) é o coração protegido, isolado de frameworks e drivers externos.
 
 ```mermaid
 graph TD
-    Client(Cliente / Web) -->|REST| AdapterWeb[Adapter: Controllers]
+    Client(Cliente / Web) -->|REST / JWT| AdapterWeb[Adapter: Controllers]
     AdapterWeb -->|Porta Entrada| UseCases[Application: UseCases]
-    UseCases -->|Regras de Negócio| Domain[Domain: Entidades Core]
+
+    subgraph Core [Núcleo Protegido]
+        UseCases -->|Regras de Negócio| Domain[Domain: Entidades & Exceptions]
+        Domain --> UseCases
+    end
 
     UseCases -->|Porta Saída| PortRepo{Repository Port}
     UseCases -->|Porta Saída| PortMsg{Notification Port}
+    UseCases -->|Porta Saída| PortSec{PasswordEncoder Port}
 
-    PortRepo --> AdapterPersist[Adapter: Postgres / JPA]
+    PortRepo --> AdapterPersist[Adapter: Spring Data JPA]
     PortMsg --> AdapterSQS[Adapter: AWS SQS]
+    PortSec --> AdapterSec[Adapter: BCrypt]
 
     AdapterPersist --> DB[(PostgreSQL)]
     AdapterSQS --> Queue[[AWS SQS / LocalStack]]
@@ -35,143 +42,121 @@ graph TD
 
 ---
 
-## ⚔️ O Bestiário Tecnológico (Tech Stack)
+## ⚔️ O Arsenal (Tech Stack)
 
-Cada ferramenta foi escolhida com a precisão de um alquimista:
+Cada ferramenta foi escolhida com a precisão de um alquimista preparando uma poção:
 
-*   **Java 21 (LTS):** A Espada de Prata. Moderna, rápida e tipada.
-*   **Spring Boot 3.5:** Os Mutagênicos. Injeção de dependência e auto-configuração.
-*   **Docker & Docker Compose:** A Caixa de Dimeritium. Isolamento perfeito dos ambientes.
-*   **LocalStack:** O Teste das Ervas. Simulação completa da AWS na sua máquina local.
-*   **Terraform:** Magia da Terra (IaC). Criação e destruição de infraestrutura real na AWS.
-*   **PostgreSQL:** O Cofre. Banco de dados relacional robusto.
-*   **Flyway:** O Cronista. Versionamento e migração do banco de dados.
-*   **Prometheus & Grafana:** Os Sentidos de Bruxo. Observabilidade e métricas em tempo real.
-*   **Swagger (OpenAPI):** O Bestiário. Documentação viva da API.
-
----
-
-## 🎒 Equipamento Necessário (Pré-requisitos)
-
-Antes de iniciar a caçada, certifique-se de ter em seu inventário:
-
-1.  **Java 21 JDK** instalado.
-2.  **Docker Desktop** rodando.
-3.  **AWS CLI** configurado (mesmo que use apenas LocalStack).
-4.  **Terraform** instalado (para IaC).
-5.  **IntelliJ IDEA** (Recomendado com o plugin "EnvFile").
+*   **Java 21 (LTS):** A Lâmina Principal. Performance e tipagem forte.
+*   **Spring Boot 3.5.9:** Os Mutagênicos. Framework base para injeção de dependência e web.
+*   **Spring Security + JWT:** O Sinal Heliotrop. Proteção robusta contra acessos não autorizados.
+*   **Docker & Docker Compose:** A Caixa de Dimeritium. Isolamento completo de ambientes.
+*   **Terraform:** Magia da Terra (IaC). Provisionamento de infraestrutura real na AWS.
+*   **LocalStack:** Ilusão de Nível Mestre. Simula SQS e S3 localmente.
+*   **Flyway:** O Cronista. Versionamento e migração evolutiva do banco de dados.
+*   **Prometheus & Grafana:** Sentidos de Bruxo. Observabilidade e métricas em tempo real.
+*   **Qodana & ArchUnit:** O Medalhão. Análise estática de qualidade e testes de arquitetura.
+*   **Testcontainers:** Bonecos de Treino. Testes de integração com banco real em container.
 
 ---
 
-## 🧪 Preparação das Poções (Variáveis de Ambiente)
+## 🎒 Inventário (Pré-requisitos)
 
-O segredo para alternar entre mundos está nas variáveis de ambiente. Crie dois arquivos na raiz do projeto (baseados no `env.example`):
+Antes de iniciar a caçada, certifique-se de ter equipado:
 
-### 📜 `.env.dev` (Para Desenvolvimento Local - Caminho do Lobo)
-Use este para rodar com **LocalStack**. As chaves são fictícias.
+1.  **Java 21 JDK**
+2.  **Docker Desktop** (Engine rodando)
+3.  **AWS CLI** (Configurado, mesmo que use credenciais dummy)
+4.  **Terraform** (Opcional, apenas para deploy AWS)
 
-```properties
-SPRING_PROFILES_ACTIVE=dev
-SPRING_CLOUD_AWS_ENDPOINT=http://localhost:4566
-AWS_ACCESS_KEY_ID=test
-AWS_SECRET_ACCESS_KEY=test
-AWS_REGION=us-east-1
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=vivaldi_bank
-DB_USER=postgres
-DB_PASSWORD=postgres
-GF_SECURITY_ADMIN_PASSWORD=admin
-JWT_SECRET=segredo-padrao-desenvolvimento
+---
+
+## 🧪 Preparação das Poções (Setup)
+
+### 1. Configure as Variáveis de Ambiente
+O projeto inclui um grimório base em `env.example`.
+*   Para rodar localmente, o Docker Compose já injeta as variáveis necessárias para o ambiente DEV.
+*   Para configurações manuais, crie arquivos `.env.dev` ou `.env.prod` baseados no `env.example` na raiz do projeto.
+
+### 2. O Caminho do Lobo (Ambiente de Desenvolvimento)
+Rode a infraestrutura completa (Banco, LocalStack, Monitoramento) com um único comando:
+
+```bash
+docker compose up -d
 ```
 
-### 📜 `.env.prod` (Para Conexão AWS Real - Caminho do Grifo)
-Use este após rodar o Terraform. Preencha com os dados reais gerados.
+Isso invocará:
+*   **PostgreSQL 16** (Porta 5432)
+*   **LocalStack** (Porta 4566 - SQS/S3)
+*   **Prometheus** (Porta 9090)
+*   **Grafana** (Porta 3000 - Login: `admin`/`admin`)
 
-```properties
-SPRING_PROFILES_ACTIVE=prod
-# NÃO defina SPRING_CLOUD_AWS_ENDPOINT aqui!
-spring.docker.compose.enabled=false
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=SUA_ACCESS_KEY_REAL
-AWS_SECRET_ACCESS_KEY=SUA_SECRET_KEY_REAL
-# Preencha com o output do Terraform
-DB_HOST=vivaldi-db-instance.XXXXXXXX.us-east-1.rds.amazonaws.com
-DB_PORT=5432
-DB_NAME=vivaldi_bank
-DB_USER=admin123
-DB_PASSWORD=admin123
-JWT_SECRET=SuaSenhaForteDeProducaoAqui
+Execute a aplicação via Gradle ou IntelliJ (Profile: `dev`):
+```bash
+./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
 ---
 
-## 🐺 O Caminho do Lobo (Desenvolvimento Local)
+## 🦅 O Caminho do Grifo (Deploy & Scripts)
 
-Ideal para o dia a dia. Tudo roda no seu computador, sem custos de nuvem.
+### Automação de Runtime (Witcher Ops)
+Possuímos um script especializado para rodar a imagem de produção localmente, simulando o ambiente final.
 
-1.  **Invoque os Containers (LocalStack + Postgres + Observabilidade):**
+1.  Copie o template: `cp run_app.template.sh run_app.sh`
+2.  Edite o `run_app.sh` com suas credenciais (O git ignora este arquivo por segurança).
+3.  Execute o ritual:
     ```bash
-    docker compose up -d
+    ./run_app.sh
     ```
 
-2.  **Execute a Aplicação:**
-    No IntelliJ, configure para usar o arquivo `.env.dev`.
-    Ou via terminal:
-    ```bash
-    ./gradlew bootRun --args='--spring.profiles.active=dev'
-    ```
+### Infraestrutura como Código (Terraform)
+Para materializar a fortaleza na nuvem AWS:
 
-3.  **Acesse o Swagger:** [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
-4.  **Acesse o Grafana (Métricas):** [http://localhost:3000](http://localhost:3000) (User/Pass: `admin`/`admin`)
+```bash
+cd terraform
+terraform init
+terraform apply -auto-approve
+```
+⚠️ *Lembre-se de destruir os recursos após o uso (`terraform destroy`) para evitar a maldição da Fatura AWS.*
 
 ---
 
-## 🦅 O Caminho do Grifo (Infraestrutura AWS Real)
+## ⚡ CI/CD: O Teste das Ervas (GitHub Actions)
 
-Quando estiver pronto para enfrentar o mundo real. **Atenção:** Isso consome moedas (custos da AWS).
+Toda vez que um código é empurrado para a `main` ou branchs de `feat/`, ele passa pelo rigoroso "Trial of the Grasses":
 
-1.  **Provisionar Infraestrutura (Terraform):**
-    Entre na pasta de magia da terra e execute o ritual de criação:
-    ```bash
-    cd terraform
-    terraform init
-    terraform apply -auto-approve
-    ```
-    *Anote os outputs gerados (RDS Endpoint, etc) e atualize seu arquivo `.env.prod`.*
-
-2.  **Rodar a Aplicação Conectada na Nuvem:**
-    Agora sua aplicação rodará localmente, mas se conectará ao Banco (RDS) e Filas (SQS) reais da AWS.
-    *   Configure seu IntelliJ para usar o arquivo `.env.prod`.
-    *   Execute a aplicação.
-
-3.  **O Expurgo (Destruição) ⚠️:**
-    Para evitar que os cobradores de impostos de Nilfgaard (Fatura da AWS) venham atrás de você, destrua os recursos ao terminar:
-    ```bash
-    cd terraform
-    terraform destroy -auto-approve
-    ```
+1.  **Checkout & Setup:** Prepara o ambiente Java 21.
+2.  **Build & Unit Tests:** Compila e roda testes unitários.
+3.  **Integration Tests:** Roda testes pesados usando Testcontainers (banco real volátil).
+4.  **Architecture Tests:** O ArchUnit verifica se alguém violou as regras hexagonais.
+5.  **Quality Gate:** O Qodana analisa o código em busca de bugs e vulnerabilidades.
+6.  **Docker Build & Push:** Se tudo passar, a imagem é forjada e enviada ao Amazon ECR.
 
 ---
 
-## 📜 Contratos de Bruxo (Endpoints Principais)
+## 📜 Contratos (Endpoints Principais)
 
-| Método | Rota | Descrição | Auth |
+A documentação completa (Swagger UI) está disponível em:
+👉 [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+
+| Método | Rota | Descrição | Nível de Acesso |
 | :--- | :--- | :--- | :---: |
-| `POST` | `/auth/login` | Autentica e gera o Token JWT (O Medalhão) | 🔓 |
-| `POST` | `/contas` | Abre uma nova conta bancária | 🔓 |
-| `POST` | `/contas/{id}/transferencia` | Move moedas entre contas via SQS (Assíncrono) | 🔒 |
-| `GET` | `/contas/{id}` | Consulta dados da conta | 🔒 |
+| `POST` | `/auth/login` | Autenticação (Retorna JWT) | 🔓 Público |
+| `POST` | `/contas` | Abertura de Conta | 🔓 Público |
+| `GET` | `/contas/{id}` | Consulta de Saldo/Extrato | 🔒 Bearer Token |
+| `POST` | `/contas/{id}/deposito` | Realizar Depósito | 🔒 Bearer Token |
+| `POST` | `/contas/{id}/saque` | Realizar Saque | 🔒 Bearer Token |
+| `POST` | `/contas/{origem}/transferencia` | Transferência entre contas | 🔒 Bearer Token |
 
 ---
 
 ## 👨‍💻 O Mestre Bruxo (Autor)
 
-Desenvolvido por **Weriton L. Petreca**
+Forjado e mantido por **Weriton L. Petreca**
 
 *   💼 [LinkedIn](https://www.linkedin.com/in/weriton-petreca)
 *   📧 Contato: eulcfr@gmail.com
 
 ---
 
-*"Aperte o passo, Carpeado!"* 🐎
+*"Vá, mas não se esqueça de limpar os logs depois da batalha."* 🐎
