@@ -1,6 +1,6 @@
 package com.vivaldibank.domain.model;
 
-import com.vivaldibank.domain.model.exception.SaldoInsuficienteException;
+import com.vivaldibank.domain.model.exceptions.SaldoInsuficienteException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -15,7 +15,7 @@ class ContaTest {
     @Test
     @DisplayName("Deve depositar valor positivo corretamente")
     void deveDepositarValor() {
-        Conta conta = new Conta("123", "Geralt", "093.311.626-85", "senha");
+        Conta conta = new Conta("123", "Geralt", new Cpf("09331162685"), "senha");
 
         conta.depositar(new BigDecimal("100.00"));
 
@@ -27,7 +27,7 @@ class ContaTest {
     @Test
     @DisplayName("Deve sacar valor quando saldo for suficiente")
     void deveSacarComSucesso() {
-        Conta conta = new Conta("123", "Geralt", "093.311.626-85", "senha");
+        Conta conta = new Conta("123", "Geralt", new Cpf("093.311.626-85"), "senha");
 
         conta.depositar(new BigDecimal("100.00"));
         conta.sacar(new BigDecimal("40.00"));
@@ -39,7 +39,7 @@ class ContaTest {
     @Test
     @DisplayName("Não deve sacar valor maior que o saldo")
     void naoDeveSacarSemSaldo() {
-        Conta conta = new Conta("123", "Geralt", "093.311.626-85", "senha");
+        Conta conta = new Conta("123", "Geralt", new Cpf("093.311.626-85"), "senha");
 
         conta.depositar(new BigDecimal("50.00"));
 

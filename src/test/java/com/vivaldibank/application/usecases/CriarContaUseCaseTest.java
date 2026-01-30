@@ -1,7 +1,8 @@
 package com.vivaldibank.application.usecases;
 
 import com.vivaldibank.domain.model.Conta;
-import com.vivaldibank.domain.model.exception.CpfJaCadastradoException;
+import com.vivaldibank.domain.model.Cpf;
+import com.vivaldibank.domain.model.exceptions.CpfJaCadastradoException;
 import com.vivaldibank.domain.ports.in.CriarContaCommand;
 import com.vivaldibank.domain.ports.out.ContaRepositoryPort;
 import com.vivaldibank.domain.ports.out.NotificacaoPort;
@@ -61,17 +62,17 @@ class CriarContaUseCaseTest {
 
         UUID idFixo = UUID.fromString("a6b56100-947a-44a7-a73c-f67a055c38ab");
 
-        Conta contaSalvaMock = new Conta(
-            idFixo,
-            "20260001",
-            "Dandelion",
-            "09331162685",
-            BigDecimal.TEN,
-            LocalDateTime.now(),
-            new ArrayList<>(),
-            "encodedPass",
-            "USER"
-        );
+        Conta contaSalvaMock = Conta.builder()
+                .id(idFixo)
+                .numero("20260001")
+                .titularNome("Dandelion")
+                .cpf(new Cpf("09331162685"))
+                .saldo(BigDecimal.TEN)
+                .criadoEm(LocalDateTime.now())
+                .movimentacoes(new ArrayList<>())
+                .senha("encodedPass")
+                .role("USER")
+                .build();
 
 
         when(passwordEncoder.encode("123")).thenReturn("encodedPass");

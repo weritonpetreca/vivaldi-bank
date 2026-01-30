@@ -1,6 +1,7 @@
 package com.vivaldibank.infrastructure.adapters.out.persistence;
 
 import com.vivaldibank.domain.model.Conta;
+import com.vivaldibank.domain.model.Cpf;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +32,7 @@ class ContaRepositoryAdapterTest {
     @Test
     @DisplayName("Deve salvar uma conta com sucesso")
     void deveSalvarConta() {
-        Conta contaDominio = new Conta("12345", "João Silva", "09331162685", "senha123");
+        Conta contaDominio = new Conta("12345", "João Silva", new Cpf("09331162685"), "senha123");
         ContaEntity contaEntity = new ContaEntity(UUID.randomUUID(), "12345", BigDecimal.ZERO, "João Silva", "09331162685", LocalDateTime.now(), "senha123", "USER", new ArrayList<>());
 
         when(contaMapper.toEntity(contaDominio)).thenReturn(contaEntity);

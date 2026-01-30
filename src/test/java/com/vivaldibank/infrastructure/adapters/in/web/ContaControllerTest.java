@@ -3,6 +3,7 @@ package com.vivaldibank.infrastructure.adapters.in.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vivaldibank.application.usecases.*;
 import com.vivaldibank.domain.model.Conta;
+import com.vivaldibank.domain.model.Cpf;
 import com.vivaldibank.domain.ports.in.CriarContaCommand;
 import com.vivaldibank.infrastructure.adapters.in.web.dto.CriarContaRequest;
 import com.vivaldibank.infrastructure.adapters.out.persistence.SpringDataContaRepository;
@@ -65,7 +66,7 @@ class ContaControllerTest {
     void deveCriarContaComSucesso() throws Exception {
 
         CriarContaRequest request = new CriarContaRequest("Geralt de Rivia", "09331162685", BigDecimal.ZERO, "senha123");
-        Conta contaCriada = new Conta("20260001", "Geralt de Rivia", "09331162685", "senha123");
+        Conta contaCriada = new Conta("20260001", "Geralt de Rivia", new Cpf("09331162685"), "senha123");
 
         when(tokenService.gerarToken(any())).thenReturn("token-jwt-fake");
 

@@ -1,11 +1,11 @@
 package com.vivaldibank.infrastructure.adapters.out.persistence;
 
 import com.vivaldibank.domain.model.Conta;
+import com.vivaldibank.domain.model.Cpf;
 import com.vivaldibank.domain.model.Movimentacao;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class ContaMapper {
@@ -15,7 +15,7 @@ public class ContaMapper {
         entity.setId(domain.getId());
         entity.setNumero(domain.getNumero());
         entity.setTitularNome(domain.getTitularNome());
-        entity.setCpf(domain.getCpf());
+        entity.setCpf(domain.getCpf().getNumero());
         entity.setSaldo(domain.getSaldo());
         entity.setCriadoEm(domain.getCriadoEm());
         entity.setSenha(domain.getSenha());
@@ -32,7 +32,7 @@ public class ContaMapper {
                         m.getContraparteNumeroConta(),
                         entity
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         entity.setMovimentacoes(movimentacoesEntity);
 
@@ -49,18 +49,18 @@ public class ContaMapper {
                         m.getContraparteNome(),
                         m.getContraparteNumeroConta()
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
-        return new Conta(
-                entity.getId(),
-                entity.getNumero(),
-                entity.getTitularNome(),
-                entity.getCpf(),
-                entity.getSaldo(),
-                entity.getCriadoEm(),
-                movimentacoesDomain,
-                entity.getSenha(),
-                entity.getRole()
-        );
+        return Conta.builder()
+                .id(entity.getId())
+                .numero(entity.getNumero())
+                .titularNome(entity.getTitularNome())
+                .cpf(new Cpf(entity.getCpf()))
+                .saldo(entity.getSaldo())
+                .criadoEm(entity.getCriadoEm())
+                .movimentacoes(movimentacoesDomain)
+                .senha(entity.getSenha())
+                .role(entity.getRole())
+                .build();
     }
 }

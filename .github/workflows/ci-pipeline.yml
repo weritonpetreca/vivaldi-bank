@@ -3,7 +3,7 @@ name: Java CI with Gradle
 # Quando esse pipeline vai rodar?
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "refactor/**" ]
   pull_request:
     branches: [ "main" ]
 
@@ -46,14 +46,27 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 7. Constrói a imagem Docker (apenas Build, sem Push por enquanto)
-      - name: Build Docker Image
+      # 7. Autenticação na AWS
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # 8. Login no Amazon ECR
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 9. Constrói a imagem Docker
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
-          push: false #Mudaremos para 'true' quando tiversmo um Registry
-          tags: vivaldi-bank-api:latest
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/vivaldi-bank-api:latest
           #Otimização: Cacheia as camadas para o build ficar rápido
-          cache-form: type=gha
+          cache-from: type=gha
           cache-to: type=gha,mode=max
