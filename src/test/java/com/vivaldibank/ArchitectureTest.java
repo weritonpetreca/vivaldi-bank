@@ -1,5 +1,6 @@
 package com.vivaldibank;
 
+import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
@@ -27,7 +28,9 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
  *  Dependências proibidas: de dentro para fora.
  * </pre>
  */
-@AnalyzeClasses(packages = "com.vivaldibank")
+@AnalyzeClasses(
+    packages = "com.vivaldibank",
+importOptions = ImportOption.DoNotIncludeTests.class)
 public class ArchitectureTest {
 
     @ArchTest
