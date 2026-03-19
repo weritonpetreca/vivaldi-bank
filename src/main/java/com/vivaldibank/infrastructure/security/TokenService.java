@@ -11,12 +11,19 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+/**
+ * Serviço responsável pela geração e validação de tokens JWT.
+ *
+ * <p>Utiliza o algoritmo HMAC256 com uma chave secreta configurável via
+ * variável de ambiente {@code JWT_SECRET}. Em ambiente de desenvolvimento,
+ * um valor padrão é utilizado automaticamente.</p>
+ */
 @Service
 public class TokenService {
 
     // Em produção, isso vem de variável de ambiente (application.yml)
     // Por enquanto, deixamos fixo para facilitar
-    @Value("${vivaldi.security.secret:segredo-bruxo}")
+    @Value("${vivaldi.security.jwt-secret:segredo-bruxo}")
     private String secret;
 
     private static final String ISSUER = "vivaldi-bank-api";
@@ -27,6 +34,7 @@ public class TokenService {
             return JWT.create()
                 .withIssuer(ISSUER)         // Quem emitiu
                 .withSubject(subject)            // Quem é o dono (CPF)
+                .withIssuedAt(Instant.now())
                 .withExpiresAt(gerarDataExpiracao())    // Quando vence
                 .sign(algorithm);                       // Assina
         } catch (JWTCreationException exception) {
@@ -37,7 +45,6 @@ public class TokenService {
     public String validarToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-
             return JWT.require(algorithm)
                 .withIssuer(ISSUER)
                 .build()
