@@ -6,17 +6,16 @@
 ![AWS SQS](https://img.shields.io/badge/AWS_SQS-Event_Driven-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
 ![Security](https://img.shields.io/badge/Security-JWT_&_BCrypt-red?style=for-the-badge&logo=spring-security&logoColor=white)
+![Coverage](https://img.shields.io/badge/Coverage-66%25-yellow?style=for-the-badge&logo=jacoco&logoColor=white)
 ![Quality](https://img.shields.io/badge/Quality-Qodana_%2B_ArchUnit-25A162?style=for-the-badge&logo=jetbrains&logoColor=white)
 
 > *"O código é como uma espada de prata: precisa ser afiado, leve e mortal contra bugs."*
 
-Bem-vindo a **Kaer Morhen**, a fortaleza digital do **Vivaldi Bank**. Esta é uma API financeira Enterprise, forjada para suportar alta concorrência, escalabilidade e segurança bancária. O projeto segue estritamente as melhores práticas de Engenharia de Software, preparado para rodar tanto em simulações locais (**LocalStack**) quanto no campo de batalha real (**AWS Cloud**).
+API financeira Enterprise construída com **Arquitetura Hexagonal**, preparada para rodar localmente via **LocalStack** ou na **AWS Cloud**.
 
 ---
 
-## 🏰 Arquitetura (O Diagrama da Fortaleza)
-
-Este sistema foi construído sobre os pilares da **Arquitetura Hexagonal (Ports & Adapters)**. O Domínio (Regras de Negócio) é o coração protegido, isolado de frameworks e drivers externos.
+## 🏰 Arquitetura
 
 ```mermaid
 graph TD
@@ -31,131 +30,276 @@ graph TD
     UseCases -->|Porta Saída| PortRepo{Repository Port}
     UseCases -->|Porta Saída| PortMsg{Notification Port}
     UseCases -->|Porta Saída| PortSec{PasswordEncoder Port}
+    UseCases -->|Porta Saída| PortTx{Transactional Port}
 
     PortRepo --> AdapterPersist[Adapter: Spring Data JPA]
     PortMsg --> AdapterSQS[Adapter: AWS SQS]
     PortSec --> AdapterSec[Adapter: BCrypt]
+    PortTx --> AdapterTx[Adapter: TransactionTemplate]
 
     AdapterPersist --> DB[(PostgreSQL)]
     AdapterSQS --> Queue[[AWS SQS / LocalStack]]
 ```
 
----
+### Decisões Arquiteturais
 
-## ⚔️ O Arsenal (Tech Stack)
-
-Cada ferramenta foi escolhida com a precisão de um alquimista preparando uma poção:
-
-*   **Java 21 (LTS):** A Lâmina Principal. Performance e tipagem forte.
-*   **Spring Boot 3.5.9:** Os Mutagênicos. Framework base para injeção de dependência e web.
-*   **Spring Security + JWT:** O Sinal Heliotrop. Proteção robusta contra acessos não autorizados.
-*   **Docker & Docker Compose:** A Caixa de Dimeritium. Isolamento completo de ambientes.
-*   **Terraform:** Magia da Terra (IaC). Provisionamento de infraestrutura real na AWS.
-*   **LocalStack:** Ilusão de Nível Mestre. Simula SQS e S3 localmente.
-*   **Flyway:** O Cronista. Versionamento e migração evolutiva do banco de dados.
-*   **Prometheus & Grafana:** Sentidos de Bruxo. Observabilidade e métricas em tempo real.
-*   **Qodana & ArchUnit:** O Medalhão. Análise estática de qualidade e testes de arquitetura.
-*   **Testcontainers:** Bonecos de Treino. Testes de integração com banco real em container.
+- **`TransactionalPort`** — transações gerenciadas via porta, mantendo UseCases livres do Spring. Usa `TransactionTemplate` em vez de `@Transactional` (AOP), evitando problemas de self-invocation.
+- **`SecurityFilter`** — depende de `UserDetailsService`, não do repositório diretamente.
+- **ArchUnit** — testes arquiteturais validam as fronteiras em tempo de build.
 
 ---
 
-## 🎒 Inventário (Pré-requisitos)
+## ⚔️ Tech Stack
 
-Antes de iniciar a caçada, certifique-se de ter equipado:
-
-1.  **Java 21 JDK**
-2.  **Docker Desktop** (Engine rodando)
-3.  **AWS CLI** (Configurado, mesmo que use credenciais dummy)
-4.  **Terraform** (Opcional, apenas para deploy AWS)
+| Categoria | Tecnologia |
+|---|---|
+| **Linguagem** | Java 21 (LTS) |
+| **Framework** | Spring Boot 3.5 |
+| **Segurança** | Spring Security + JWT (auth0 java-jwt) |
+| **Persistência** | Spring Data JPA + PostgreSQL + Flyway |
+| **Mensageria** | AWS SQS (awspring) |
+| **Observabilidade** | Prometheus + Grafana |
+| **Testes** | JUnit 5, Mockito, JaCoCo, ArchUnit, Testcontainers |
+| **Documentação** | SpringDoc OpenAPI (Swagger UI) |
+| **Infraestrutura** | Docker, Terraform, AWS ECR |
+| **CI/CD** | GitHub Actions + Amazon ECR |
+| **Qualidade** | Qodana (JetBrains) |
 
 ---
 
-## 🧪 Preparação das Poções (Setup)
+## 🎒 Pré-requisitos
 
-### 1. Configure as Variáveis de Ambiente
-O projeto inclui um grimório base em `env.example`.
-*   Para rodar localmente, o Docker Compose já injeta as variáveis necessárias para o ambiente DEV.
-*   Para configurações manuais, crie arquivos `.env.dev` ou `.env.prod` baseados no `env.example` na raiz do projeto.
+1. **Java 21 JDK**
+2. **Docker Desktop** (necessário para testes de integração via Testcontainers)
+3. **AWS CLI** configurado (`aws configure`)
+4. **Terraform**
+5. **GitHub CLI** — `gh` (opcional)
 
-### 2. O Caminho do Lobo (Ambiente de Desenvolvimento)
-Rode a infraestrutura completa (Banco, LocalStack, Monitoramento) com um único comando:
+---
+
+## 🧪 Rodando Localmente (DEV)
+
+### 1. Variáveis de Ambiente
 
 ```bash
-docker compose up -d
+cp env.example .env
+# Edite .env com os valores de desenvolvimento
 ```
 
-Isso invocará:
-*   **PostgreSQL 16** (Porta 5432)
-*   **LocalStack** (Porta 4566 - SQS/S3)
-*   **Prometheus** (Porta 9090)
-*   **Grafana** (Porta 3000 - Login: `admin`/`admin`)
+### 2. Subir Infraestrutura Local
 
-Execute a aplicação via Gradle ou IntelliJ (Profile: `dev`):
+```bash
+docker compose --env-file .env up -d
+```
+
+| Serviço | Porta |
+|---|---|
+| PostgreSQL | 5432 |
+| LocalStack (SQS) | 4566 |
+| Prometheus | 9090 |
+| Grafana | 3000 (admin/admin) |
+
+### 3. Executar a Aplicação
+
 ```bash
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
+Via IntelliJ: use `.run/Vivaldi - DEV.run.xml`.
+
+### 4. Swagger UI
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
 ---
 
-## 🦅 O Caminho do Grifo (Deploy & Scripts)
+## 🧬 Testes
 
-### Automação de Runtime (Witcher Ops)
-Possuímos um script especializado para rodar a imagem de produção localmente, simulando o ambiente final.
+### Unitários (sem Docker)
 
-1.  Copie o template: `cp run_app.template.sh run_app.sh`
-2.  Edite o `run_app.sh` com suas credenciais (O git ignora este arquivo por segurança).
-3.  Execute o ritual:
-    ```bash
-    ./run_app.sh
-    ```
+```bash
+./gradlew test --tests "com.vivaldibank.application.*"
+./gradlew test --tests "com.vivaldibank.domain.*"
+./gradlew test --tests "com.vivaldibank.infrastructure.adapters.in.web.*"
+```
 
-### Infraestrutura como Código (Terraform)
-Para materializar a fortaleza na nuvem AWS:
+### Todos os testes + cobertura JaCoCo
+
+Requer **Docker rodando**:
+
+```bash
+./gradlew test jacocoTestReport
+```
+
+Relatório: `build/reports/jacoco/test/html/index.html`
+
+### Testes de Arquitetura (ArchUnit)
+
+```bash
+./gradlew test --tests "com.vivaldibank.ArchitectureTest"
+```
+
+**Fronteiras verificadas:**
+- `domain` não depende de `infrastructure` nem de `application`
+- `application` não depende de `infrastructure` nem de frameworks (Spring, Jakarta)
+- `adapters.in.web` não depende de `adapters.out.persistence`
+
+---
+
+## 📜 Endpoints
+
+| Método | Rota | Descrição | Acesso |
+|---|---|---|---|
+| `POST` | `/auth/login` | Autenticação — retorna JWT | 🔓 Público |
+| `POST` | `/contas` | Abertura de conta (auto-login) | 🔓 Público |
+| `GET` | `/contas/{id}` | Saldo e extrato | 🔒 JWT |
+| `POST` | `/contas/{id}/deposito` | Depósito | 🔒 JWT |
+| `POST` | `/contas/{id}/saque` | Saque | 🔒 JWT |
+| `POST` | `/contas/{origem}/transferencia` | Transferência | 🔒 JWT |
+
+---
+
+## 🦅 Deploy Completo na AWS
+
+Siga esta ordem — pular etapas causará erros.
+
+### Etapa 1 — Provisionar Infraestrutura (Terraform)
 
 ```bash
 cd terraform
+cp terraform.tfvars.example terraform.tfvars
+# terraform.tfvars contém: db_password = "admin123"
+
 terraform init
 terraform apply -auto-approve
 ```
-⚠️ *Lembre-se de destruir os recursos após o uso (`terraform destroy`) para evitar a maldição da Fatura AWS.*
+
+O Terraform detecta seu IP automaticamente e libera apenas ele no Security Group do RDS.
+
+Outputs ao final:
+
+```
+ecr_url     = "635106763014.dkr.ecr.us-east-1.amazonaws.com/vivaldi-bank-api"
+db_endpoint = "vivaldi-db-instance.xxxxxx.us-east-1.rds.amazonaws.com:5432"
+ip_liberado = "SEU_IP/32"
+```
+
+> Copie o `db_endpoint` — será usado no próximo passo.
+
+### Etapa 2 — Configurar o Script de Deploy
+
+```bash
+cd ..
+cp run_app.template.sh run_app.sh
+```
+
+> ⚠️ Windows/WSL — corrija quebras de linha antes de executar:
+> ```bash
+> sed -i 's/\r//' run_app.sh
+> ```
+
+Edite `run_app.sh`:
+
+```bash
+AWS_ACCOUNT_ID="<seu account id AWS>"
+ENV_DB_HOST="<db_endpoint sem a porta>"
+ENV_DB_PASSWORD="admin123"
+```
+
+### Etapa 3 — Enviar Imagem para o ECR
+
+O CI/CD faz isso automaticamente a cada push na `main`. Para disparar manualmente:
+
+```bash
+gh workflow run ci-pipeline.yml --ref main
+gh run watch
+```
+
+Aguarde o CI concluir antes de continuar.
+
+Ou build e push manual:
+
+```bash
+aws ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin \
+  <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com
+
+./gradlew bootJar
+docker build -t vivaldi-bank-api .
+docker tag vivaldi-bank-api:latest \
+  <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/vivaldi-bank-api:latest
+docker push \
+  <AWS_ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/vivaldi-bank-api:latest
+```
+
+### Etapa 4 — Executar
+
+```bash
+./run_app.sh
+```
+
+### Etapa 5 — Validar
+
+```bash
+curl -X POST http://localhost:8080/contas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nomeTitular": "Geralt de Rivia",
+    "cpf": "093.311.626-85",
+    "depositoInicial": 100.00,
+    "senha": "senha123"
+  }'
+```
+
+Resposta esperada: `HTTP 201` com `id`, `numeroConta` e `token`.
 
 ---
 
-## ⚡ CI/CD: O Teste das Ervas (GitHub Actions)
+## 🗑️ Destruindo a Infraestrutura
 
-Toda vez que um código é empurrado para a `main` ou branchs de `feat/`, ele passa pelo rigoroso "Trial of the Grasses":
+> ⚠️ O RDS tem `deletion_protection = true`. Siga a ordem abaixo.
 
-1.  **Checkout & Setup:** Prepara o ambiente Java 21.
-2.  **Build & Unit Tests:** Compila e roda testes unitários.
-3.  **Integration Tests:** Roda testes pesados usando Testcontainers (banco real volátil).
-4.  **Architecture Tests:** O ArchUnit verifica se alguém violou as regras hexagonais.
-5.  **Quality Gate:** O Qodana analisa o código em busca de bugs e vulnerabilidades.
-6.  **Docker Build & Push:** Se tudo passar, a imagem é forjada e enviada ao Amazon ECR.
+```bash
+# 1. Desativa proteção via AWS CLI
+aws rds modify-db-instance \
+  --db-instance-identifier vivaldi-db-instance \
+  --no-deletion-protection \
+  --apply-immediately
 
----
-
-## 📜 Contratos (Endpoints Principais)
-
-A documentação completa (Swagger UI) está disponível em:
-👉 [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
-
-| Método | Rota | Descrição | Nível de Acesso |
-| :--- | :--- | :--- | :---: |
-| `POST` | `/auth/login` | Autenticação (Retorna JWT) | 🔓 Público |
-| `POST` | `/contas` | Abertura de Conta | 🔓 Público |
-| `GET` | `/contas/{id}` | Consulta de Saldo/Extrato | 🔒 Bearer Token |
-| `POST` | `/contas/{id}/deposito` | Realizar Depósito | 🔒 Bearer Token |
-| `POST` | `/contas/{id}/saque` | Realizar Saque | 🔒 Bearer Token |
-| `POST` | `/contas/{origem}/transferencia` | Transferência entre contas | 🔒 Bearer Token |
+# 2. Aguarda ~1 minuto e destroi tudo
+cd terraform
+terraform destroy -auto-approve
+```
 
 ---
 
-## 👨‍💻 O Mestre Bruxo (Autor)
+## ⚡ CI/CD — GitHub Actions
 
-Forjado e mantido por **Weriton L. Petreca**
+### Java CI (`ci-pipeline.yml`)
 
-*   💼 [LinkedIn](https://www.linkedin.com/in/weriton-petreca)
-*   📧 Contato: eulcfr@gmail.com
+Push em `main`, `feat/**`, `refactor/**` e PRs para `main`.
+
+1. Setup Java 21 + build + testes
+2. Relatório JaCoCo (artefato na aba Summary)
+3. Build e push da imagem para o ECR
+
+**Secrets necessários:** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+
+### Qodana (`qodana_code_quality.yml`)
+
+Análise estática de qualidade. **Secret necessário:** `QODANA_TOKEN`
+
+---
+
+## 👨‍💻 Autor
+
+**Weriton L. Petreca**
+
+- 💼 [LinkedIn](https://www.linkedin.com/in/weriton-petreca)
+- 🌐 [weriton.dev](https://weriton.dev)
+- 📧 eulcfr@gmail.com
 
 ---
 

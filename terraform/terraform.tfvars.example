@@ -1,0 +1,10 @@
+# ==============================================================================
+# VARIÁVEIS DO TERRAFORM - VIVALDI BANK
+# ==============================================================================
+# INSTRUÇÕES:
+# 1. Copie este arquivo: cp terraform.tfvars.example terraform.tfvars
+# 2. Preencha os valores reais
+# 3. NUNCA comite o terraform.tfvars — ele está no .gitignore
+# ==============================================================================
+
+db_password = "TROQUE_PELA_SENHA_REAL"

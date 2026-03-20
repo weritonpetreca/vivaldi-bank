@@ -10,6 +10,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,11 +22,11 @@ import java.util.Collections;
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
-    private final SpringDataContaRepository repository;
+    private final UserDetailsService userDetailsService;
 
-    public SecurityFilter(TokenService tokenService, SpringDataContaRepository repository) {
+    public SecurityFilter(TokenService tokenService, UserDetailsService userDetailsService) {
         this.tokenService = tokenService;
-        this.repository = repository;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -41,20 +43,14 @@ public class SecurityFilter extends OncePerRequestFilter {
             String cpf = tokenService.validarToken(token);
 
             if (!cpf.isEmpty()) {
-                // 3. Token válido! Buscamos o usuário no banco para garantir que ainda existe
-                // (E para pegar as permissões/roles atualizadas)
-                ContaEntity contaEntity = repository.findByCpf(cpf)
-                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado!"));
+                UserDetails userDetails = userDetailsService.loadUserByUsername(cpf);
 
-                // 4. Criamos o objeto de "Autoridade" do Spring
-                var authorities = Collections.singletonList(new SimpleGrantedAuthority(contaEntity.getRole()));
-
-                // Adaptamos para o UserDetails do Spring (apenas para criar o objeto de autenticação)
-                var userDetails = new User(contaEntity.getCpf(), contaEntity.getSenha(), authorities);
-
-                // 5. Autenticar no Contexto
                 // Criamos um token "de dentro do Spring" (não é o JWT) para dizer que está logado
-                var authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+                var authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+                );
 
                 // Salvamos no contexto: "O usuário X está logado nesta thread"
                 SecurityContextHolder.getContext().setAuthentication((authentication));
@@ -67,10 +63,12 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private String recoverToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-        if (authHeader == null) return null;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
 
         // O cabeçalho vem como "Bearer ..."
         // Precisamos remover o prefixo "Bearer" para pegar só o token
-        return authHeader.replace("Bearer ", "");
+        return authHeader.substring(7);
     }
 }

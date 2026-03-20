@@ -58,9 +58,6 @@ class ContaControllerTest {
     @MockitoBean
     private TokenService tokenService;
 
-    @MockitoBean
-    private SpringDataContaRepository contaRepository;
-
     @Test
     @DisplayName("Deve criar uma conta com sucesso e retornar status 201")
     void deveCriarContaComSucesso() throws Exception {
