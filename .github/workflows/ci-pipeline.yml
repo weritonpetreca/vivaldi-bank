@@ -35,7 +35,18 @@ jobs:
       - name: Build with Gradle and Run Tests
         run: ./gradlew build
 
-      # 5. (Opcional) Publica relatório de testes se falhar
+      # 5. Gera e publica relatório de cobertura JaCoCo
+      - name: Generate JaCoCo Coverage Report
+        run: ./gradlew jacocoTestReport
+
+      - name: Upload Coverage Report
+        if: always() # Sempre tenta subir o relatório, mesmo que os testes falhem
+        uses: actions/upload-artifact@v6
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test/html/
+
+      # 6. (Opcional) Publica relatório de testes se falhar
       - name: Upload Test Report
         if: failure()
         uses: actions/upload-artifact@v6
@@ -43,11 +54,11 @@ jobs:
           name: test-report
           path: build/reports/tests/test/
 
-      # 6. Configura o Docker Buildx (Ferramenta moderna de build)
+      # 7. Configura o Docker Buildx (Ferramenta moderna de build)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      # 7. Autenticação na AWS
+      # 8. Autenticação na AWS
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -55,12 +66,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 8. Login no Amazon ECR
+      # 9. Login no Amazon ECR
       - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 9. Constrói a imagem Docker
+      # 10. Constrói a imagem Docker
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v7
         with:

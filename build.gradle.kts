@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.5.9"
     id("io.spring.dependency-management") version "1.1.7"
+    jacoco
 }
 
 group = "com.vivaldibank"
@@ -52,7 +53,35 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // garante que os testes rodam antes do relatório
+
+    reports {
+        xml.required = true   // necessário para ferramentas de CI
+        html.required = true  // relatório visual navegável
+    }
+
+    // Exclui classes que não fazem sentido medir cobertura
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "**/config/**",        // classes de configuração Spring
+                    "**/events/**",        // records de eventos SQS
+                    "**/*Application*",    // classe main
+                    "**/dto/**"            // records de DTO
+                )
+            }
+        })
+    )
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     jvmArgs("-XX:+EnableDynamicAgentLoading")
+    finalizedBy(tasks.jacocoTestReport) // gera relatório automaticamente após os testes
 }
