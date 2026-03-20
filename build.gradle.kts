@@ -54,7 +54,7 @@ dependencies {
 }
 
 jacoco {
-    toolVersion = "0.8.12"
+    toolVersion = "0.8.14"
 }
 
 tasks.jacocoTestReport {
@@ -83,5 +83,6 @@ tasks.jacocoTestReport {
 tasks.withType<Test> {
     useJUnitPlatform()
     jvmArgs("-XX:+EnableDynamicAgentLoading")
+    maxHeapSize = "2g"  // limita heap dos testes
     finalizedBy(tasks.jacocoTestReport) // gera relatório automaticamente após os testes
 }

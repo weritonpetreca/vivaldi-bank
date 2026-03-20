@@ -30,7 +30,11 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
  */
 @AnalyzeClasses(
     packages = "com.vivaldibank",
-importOptions = ImportOption.DoNotIncludeTests.class)
+    importOptions = {
+        ImportOption.DoNotIncludeTests.class,
+        ImportOption.DoNotIncludeJars.class
+    }
+)
 public class ArchitectureTest {
 
     @ArchTest
